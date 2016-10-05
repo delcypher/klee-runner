@@ -73,7 +73,7 @@ class RunnerBaseClass(metaclass=abc.ABCMeta):
 
   def _setupAdditionalArgs(self, rc):
     self.additionalArgs = [ ]
-    if 'additional_args' in rc:
+    if 'additional_args' in rc and rc['additional_args'] is not None:
       if not isinstance(rc['additional_args'],list):
         raise RunnerBaseException('"additional_args" should be a list')
 
@@ -86,7 +86,7 @@ class RunnerBaseClass(metaclass=abc.ABCMeta):
   def _setupEnvironmentVariables(self, rc):
     # Set environment variables
     self.toolEnvironmentVariables = {}
-    if 'env' in rc:
+    if 'env' in rc and rc['env'] is not None:
       if not isinstance(rc['env'],dict):
         raise RunnerBaseException('"env" must map to a dictionary')
 
