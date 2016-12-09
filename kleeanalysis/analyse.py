@@ -54,8 +54,8 @@ def show_failures_as_string(test_cases):
     for test_case in test_cases:
         msg += "  Test {:06} in {}:{}\n".format(
             test_case.identifier,
-            test_case.error.file,
-            test_case.error.line)
+            test_case.error.file if hasattr(test_case.error, "file") else "<unknown>",
+            test_case.error.line if hasattr(test_case.error, "line") else "<unknown>")
     return msg
 
 def get_klee_verification_results_for_fp_bench(klee_dir):
