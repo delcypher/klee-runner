@@ -52,70 +52,73 @@ class Info:
     def __init__(self, path: "Path to a KLEE info file."):
         """Open a KLEE "info" file."""
         _logger.debug('Creating Info from "{}"'.format(path))
-        with open(path) as infofile:
-            line = infofile.readline()
-            if len(line) == 0:
-                self.empty = True
-                return
-            self.empty = False
-            self.command = line.rstrip()
-            if len(self.command) == 0:
-                raise InputError('Info file "{}" has empty command'.format(path))
+        try:
+            with open(path) as infofile:
+                line = infofile.readline()
+                if len(line) == 0:
+                    self.empty = True
+                    return
+                self.empty = False
+                self.command = line.rstrip()
+                if len(self.command) == 0:
+                    raise InputError('Info file "{}" has empty command'.format(path))
 
-            match = self.__force_match(self.__re_pid, infofile.readline(), 'Info file "{}" does not contain a valid PID entry in line 2', path)
-            self.pid = int(match.group(1))
+                match = self.__force_match(self.__re_pid, infofile.readline(), 'Info file "{}" does not contain a valid PID entry in line 2', path)
+                self.pid = int(match.group(1))
 
-            match = self.__force_match(self.__re_start, infofile.readline(), 'Info file "{}" does not contain a valid started entry in line 3', path)
-            self.start = datetime(*[int(match.group(x)) for x in range(1, 7)])
+                match = self.__force_match(self.__re_start, infofile.readline(), 'Info file "{}" does not contain a valid started entry in line 3', path)
+                self.start = datetime(*[int(match.group(x)) for x in range(1, 7)])
 
-            self.__parse_searcher(infofile, path)
+                self.__parse_searcher(infofile, path)
 
-            match = self.__force_match(self.__re_finish, infofile.readline(), 'Info file "{}" does not contain a valid finished entry 1 line after the end searcher tag', path)
-            self.finish = datetime(*[int(match.group(x)) for x in range(1, 7)])
+                match = self.__force_match(self.__re_finish, infofile.readline(), 'Info file "{}" does not contain a valid finished entry 1 line after the end searcher tag', path)
+                self.finish = datetime(*[int(match.group(x)) for x in range(1, 7)])
 
-            match = self.__force_match(self.__re_elapsed, infofile.readline(), 'Info file "{}" does not contain a valid elapsed entry 2 lines after the end searcher tag', path)
-            self.elapsed = timedelta(0, int(match.group(1)) * 3600 + int(match.group(2)) * 60 + int(match.group(3)))
+                match = self.__force_match(self.__re_elapsed, infofile.readline(), 'Info file "{}" does not contain a valid elapsed entry 2 lines after the end searcher tag', path)
+                self.elapsed = timedelta(0, int(match.group(1)) * 3600 + int(match.group(2)) * 60 + int(match.group(3)))
 
-            match = self.__force_match(self.__re_explored, infofile.readline(), 'Info file "{}" does not contain a valid explored paths entry 3 lines after the end searcher tag', path)
-            self.explored_paths = int(match.group(1))
+                match = self.__force_match(self.__re_explored, infofile.readline(), 'Info file "{}" does not contain a valid explored paths entry 3 lines after the end searcher tag', path)
+                self.explored_paths = int(match.group(1))
 
-            nextLine = infofile.readline()
-            try:
-              match = self.__force_match(self.__re_constructs_per_query,
-                  nextLine,
-                  'Info file "{}" does not contain a valid avg. constructs per query entry 4 lines after the end searcher tag',
-                  path)
-              self.constructs_per_query = int(match.group(1))
-              nextLine = infofile.readline() # Get the next line for the next __force_match
-            except InputError:
-              # This line might not be emitted if there are no queries
-              self.constructs_per_query = 0
+                nextLine = infofile.readline()
+                try:
+                  match = self.__force_match(self.__re_constructs_per_query,
+                      nextLine,
+                      'Info file "{}" does not contain a valid avg. constructs per query entry 4 lines after the end searcher tag',
+                      path)
+                  self.constructs_per_query = int(match.group(1))
+                  nextLine = infofile.readline() # Get the next line for the next __force_match
+                except InputError:
+                  # This line might not be emitted if there are no queries
+                  self.constructs_per_query = 0
 
-            match = self.__force_match(self.__re_queries, nextLine, 'Info file "{}" does not contain a valid total queries entry 5 lines after the end searcher tag', path)
-            self.queries = int(match.group(1))
+                match = self.__force_match(self.__re_queries, nextLine, 'Info file "{}" does not contain a valid total queries entry 5 lines after the end searcher tag', path)
+                self.queries = int(match.group(1))
 
-            match = self.__force_match(self.__re_queries_sat, infofile.readline(), 'Info file "{}" does not contain a valid valid queries entry 6 lines after the end searcher tag', path)
-            self.satisfiable_queries = int(match.group(1))
+                match = self.__force_match(self.__re_queries_sat, infofile.readline(), 'Info file "{}" does not contain a valid valid queries entry 6 lines after the end searcher tag', path)
+                self.satisfiable_queries = int(match.group(1))
 
-            match = self.__force_match(self.__re_queries_nsat, infofile.readline(), 'Info file "{}" does not contain a valid invalid queries entry 7 lines after the end searcher tag', path)
-            self.unsatisfiable_queries = int(match.group(1))
+                match = self.__force_match(self.__re_queries_nsat, infofile.readline(), 'Info file "{}" does not contain a valid invalid queries entry 7 lines after the end searcher tag', path)
+                self.unsatisfiable_queries = int(match.group(1))
 
-            match = self.__force_match(self.__re_queries_cex, infofile.readline(), 'Info file "{}" does not contain a valid query cex entry 8 lines after the end searcher tag', path)
-            self.cex = int(match.group(1))
+                match = self.__force_match(self.__re_queries_cex, infofile.readline(), 'Info file "{}" does not contain a valid query cex entry 8 lines after the end searcher tag', path)
+                self.cex = int(match.group(1))
 
-            line = infofile.readline().rstrip()
-            if len(line) > 0:
-                raise InputError('Info file "{}" does not contain an empty line 9 lines after the end searcher tag'.format(path))
+                line = infofile.readline().rstrip()
+                if len(line) > 0:
+                    raise InputError('Info file "{}" does not contain an empty line 9 lines after the end searcher tag'.format(path))
 
-            match = self.__force_match(self.__re_instructions, infofile.readline(), 'Info file "{}" does not contain a valid total instruction entry 10 lines after the end searcher tag', path)
-            self.instructions = int(match.group(1))
+                match = self.__force_match(self.__re_instructions, infofile.readline(), 'Info file "{}" does not contain a valid total instruction entry 10 lines after the end searcher tag', path)
+                self.instructions = int(match.group(1))
 
-            match = self.__force_match(self.__re_paths, infofile.readline(), 'Info file "{}" does not contain a valid a completed paths entry 11 lines after the end searcher tag', path)
-            self.completed_paths = int(match.group(1))
+                match = self.__force_match(self.__re_paths, infofile.readline(), 'Info file "{}" does not contain a valid a completed paths entry 11 lines after the end searcher tag', path)
+                self.completed_paths = int(match.group(1))
 
-            match = self.__force_match(self.__re_tests, infofile.readline(), 'Info file "{}" does not contain a valid a generated tests entry 12 lines after the end searcher tag', path)
-            self.tests = int(match.group(1))
+                match = self.__force_match(self.__re_tests, infofile.readline(), 'Info file "{}" does not contain a valid a generated tests entry 12 lines after the end searcher tag', path)
+                self.tests = int(match.group(1))
 
-            line = infofile.readline()
-            if len(line) > 0:
-                raise InputError('Info file "{}" did not end as expected.'.format(path))
+                line = infofile.readline()
+                if len(line) > 0:
+                    raise InputError('Info file "{}" did not end as expected.'.format(path))
+        except FileNotFoundError:
+            raise InputError('Info file "{}" does not exist.'.format(path))
