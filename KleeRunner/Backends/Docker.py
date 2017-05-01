@@ -212,6 +212,7 @@ class DockerBackend(BackendBaseClass):
         self._additionalHostContainerFileMaps = dict()
         self._usedFileMapNames = set()  # HACK
         self._extra_volume_mounts = dict()
+        self._grabbed_cpus = None
         # handle required options
         if not 'image' in kwargs:
             raise DockerBackendException('"image" but be specified')
@@ -689,9 +690,10 @@ class DockerBackend(BackendBaseClass):
                         self._container['Id'], str(e)))
                 self._container = None
         finally:
-            self._resource_pool.release_docker_client(self._dc)
+            if self._dc is not None:
+                self._resource_pool.release_docker_client(self._dc)
             self._dc = None
-            if self.resource_pinning:
+            if self.resource_pinning and self._grabbed_cpus is not None:
                 self._resource_pool.release_cpus(self._grabbed_cpus)
                 self._grabbed_cpus = None
             self._killLock.release()
