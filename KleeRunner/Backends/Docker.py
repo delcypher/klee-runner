@@ -69,7 +69,7 @@ class ResourcePool:
         # Create Docker clients
         for index in range(0, self._num_jobs):
             _logger.info('Creating DockerClient {}'.format(index))
-            new_client = docker.APIClient()
+            new_client = docker.APIClient(version='1.24')
             self._docker_clients[id(new_client)] = new_client
             # Add to pool
             self._docker_client_pool.add(id(new_client))
