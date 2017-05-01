@@ -153,6 +153,7 @@ class ResourcePool:
                         for _ in range(0, self._cpus_per_job):
                             cpu = available_cpus.pop()
                             cpu_memset_tuples_to_return.add( (cpu, numa_node) )
+                        break # We are done
             else:
                 # Grab any available CPU
                 available_cpus = set(functools.reduce(
@@ -172,6 +173,9 @@ class ResourcePool:
 
 
             if len(cpu_memset_tuples_to_return) != self._cpus_per_job:
+                _logger.error('Failed to retrieve CPU resources required for job')
+                _logger.error('cpu_memset_tuples_to_return: {}'.format(cpu_memset_tuples_to_return))
+                _logger.error('cpus_per_job: {}'.format(self._cpus_per_job))
                 raise Exception('Failed to retrieve CPU resources required for job')
             return cpu_memset_tuples_to_return
 
