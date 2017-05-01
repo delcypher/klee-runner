@@ -554,7 +554,8 @@ class DockerBackend(BackendBaseClass):
                 _logger.warning('FIXME Setting cpuset_mem is broken')
                 # FIXME: Need to get this PR ( https://github.com/docker/docker-py/pull/1583 )
                 # accepted for this to work.
-                # extraHostCfgArgs['cpuset_mems'] = mem_set_to_use_str
+                # HACK: Use fork of docker-py at https://github.com/delcypher/docker-py/tree/2.2.1-release-cpuset-hacks
+                extraHostCfgArgs['cpuset_mems'] = mem_set_to_use_str
 
 
         hostCfg = self._dc.create_host_config(

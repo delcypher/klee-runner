@@ -1,4 +1,10 @@
-docker==2.2.1
+# HACK:
+# 1. Clone https://github.com/delcypher/docker-py/tree/2.2.1-release-cpuset-hacks
+# 2. Run `pip install -e .` in that directory
+#
+# This will install my fork of docker-py.
+# You should do this in a python virtualenv to limit the damage to your system.
+#docker==2.2.1
 psutil==4.3.1
 jsonschema==2.5.1
 PyYAML==3.12
