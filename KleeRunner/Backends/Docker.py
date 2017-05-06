@@ -59,7 +59,8 @@ class ResourcePool:
         self._lock = threading.Lock()
 
         # Sanity check
-        assert (num_jobs * cpus_per_job) <= len(available_cpu_ids)
+        if cpus_per_job is not None and available_cpu_ids is not None:
+            assert (num_jobs * cpus_per_job) <= len(available_cpu_ids)
 
     def _lazy_docker_client_init(self):
         # Implicitly assume lock is already held
